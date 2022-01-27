@@ -1,0 +1,48 @@
+.modal-pay{
+  .modal-dialog{
+    max-width: 400px !important;
+  }
+  @media (min-width: 576px) {
+    .modal-content {
+      margin-top: 30px;
+    }
+    .modal-dialog{
+      max-width: 380px !important;
+    }
+  }
+  @media (max-width: 576px) {
+    .modal-dialog {
+      margin: 1.5rem 1rem;
+    }
+  }
+}
+.form-pay{
+  margin: -1rem;
+  .close{
+    position: absolute;
+    right: 0.8rem;
+    top: 0.5rem;
+  }
+  &__header{
+    border-radius: 0.3rem;
+    padding: 1rem;
+    background: #f0f0f0;
+    text-align: center;
+  }
+  &__logo{
+    display: inline-block;
+    border-radius: 50%;
+    border: 2px solid black;
+    overflow: hidden;
+    margin-top: -55px;
+    margin-bottom: -5px;
+    background: black;
+  }
+  &__body{
+    padding: 1rem 1.5rem;
+  }
+  &__footer{
+    padding: 1rem;
+    border-top: 1px solid #ccc;
+  }
+}

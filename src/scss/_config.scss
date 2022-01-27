@@ -1,0 +1,23 @@
+// Images path use css
+// ------------------------------------------------
+$imgs: '../../public/images/';
+// $enable-rounded: false;
+
+// Define colors
+// ------------------------------------------------
+$theme-colors: (
+  "primary": #42a692,
+  "action": #FE1A27,
+  "secondary": #1a171b,
+  "dark": #1a171b,
+);
+
+$body-color: #222;
+$white-color: #fff;
+
+// Fonts
+// ------------------------------------------------
+$font-path: '../public/fonts';
+$font-size-base: 1rem;
+$font-family-base: 'Poppins', sans-serif;
+$fa-font-path: $font-path;

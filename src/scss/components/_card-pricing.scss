@@ -1,0 +1,42 @@
+.al-pricing{
+  padding: 2.5rem;
+  background-color: theme-color('dark');
+  background-size: cover;
+  background-position: center;
+  &__body{
+    padding: 2rem;
+    background: #fff;
+  }
+}
+
+.al-pricing-card{
+  padding: 2rem 1rem;
+  background: theme-color('dark');
+  color: #fff;
+  border-radius: 0.25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  &__title{
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    span{
+      font-size: 90%;
+    }
+  }
+}
+
+.card-pricing-h{
+  color: #fff;
+  background: theme-color('dark');
+  padding: 1rem;
+  border-radius: 0.25rem;
+  &__title{
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+}

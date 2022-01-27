@@ -1,0 +1,244 @@
+<template>
+  <div>
+    <CardMethod recomended>
+      <span slot="title">
+        <b>Paga de forma segura con tarjetas nacionales e internacionales</b>
+      </span>
+      <div slot="description" class="small mb-3">
+        Paga de forma segura con cualquier tarjeta de crédito o débito.
+        Visa, Mastercard, Amex, Diners y Tarjetas Internacionales.
+        <!-- <div v-if="discountBines.length" class="mt-2">
+          Para descuentos con tarjeta
+          <b v-for="i in discountBines" :key="i">{{ i }}, </b>
+          usa este método.
+        </div> -->
+      </div>
+      <div class="row justify-content-between align-items-end px-3">
+        <div class="col-auto">
+          <img
+            height="40"
+            class="rounded border mt-2 mr-2"
+            src="https://s3-us-west-2.amazonaws.com/joinnus.com/files/metodos/PE/mercadopago.png"
+            alt="methodimg"
+          >
+        </div>
+        <div class="col-auto mt-3">
+          <a
+            href="#"
+            @click.prevent="$emit('ok')"
+            class="btn btn-primary text-uppercase"
+          >
+            Suscríbete aquí
+          </a>
+        </div>
+      </div>
+    </CardMethod>
+    <!-- modal-pay -->
+    <b-modal
+      v-model="modalPay"
+      no-close-on-backdrop
+      modal-class="modal-pay"
+      hide-footer
+      hide-header
+      centered
+    >
+      <FormPayCard
+        :currency="currency"
+        :document-types="documentTypes"
+        :quantity="1"
+        :paymentTotal="paymentTotal"
+        :loading="loading"
+        :card="card"
+        :paymentMethodId="paymentMethodId"
+        :cardIssuers="cardIssuers"
+        :msg-error="error"
+        @hide="modalPay = false"
+        @pay-method="submitOk()"
+      >
+      </FormPayCard>
+    </b-modal>
+  </div>
+</template>
+
+<script>
+/* global Mercadopago */
+import axios from 'axios'
+import CardMethod from './CardMethod.vue'
+import FormPayCard from './FormPayCard.vue'
+
+const apiCheckout = process.env.VUE_APP_API_CHECKOUT
+const mercadoPagoKeyCo = process.env.VUE_APP_MERCADOPAGO_KEY_CO
+
+const docTypes = {
+  PE: [
+    { key: 'DNI', name: 'DNI' },
+    { key: 'CE', name: 'C.E' },
+    { key: 'RUC', name: 'RUC' },
+    { key: 'PASS', name: 'PASS' },
+    { key: 'OTHER', name: 'OTRO' }
+  ],
+  CO: [
+    { key: 'CC', name: 'Cédula de Ciudadanía' },
+    { key: 'CE', name: 'Cédula de Extranjería' },
+    { key: 'TI', name: 'Tarjeta de identidad' },
+    { key: 'NIT', name: 'Número de identificación tributaria' },
+    { key: 'PASS', name: 'Pasaporte' }
+  ],
+  EC: [
+    { key: 'CC', name: 'Cédula de Ciudadanía' },
+    { key: 'CE', name: 'Cédula de Extranjería' },
+    { key: 'TI', name: 'Tarjeta de identidad' },
+    { key: 'PASS', name: 'Pasaporte' }
+  ],
+  MX: [
+    { key: 'CC', name: 'Cédula de Ciudadanía' },
+    { key: 'CE', name: 'Cédula de Extranjería' },
+    { key: 'TI', name: 'Tarjeta de identidad' },
+    { key: 'PASS', name: 'Pasaporte' }
+  ],
+}
+
+export default {
+  components: {
+    CardMethod,
+    FormPayCard
+  },
+  data() {
+    return {
+      mercadopago: null,
+      modalPay: false,
+      loading: false,
+      isVerifyBin: false,
+      error: '',
+      paymentMethodId: '',
+      paymentMethodToken: '',
+      cardIssuers: [],
+      card: {
+        number: '',
+        name: '',
+        expiry: '',
+        cvc: '',
+        documentType: '',
+        document: '',
+        type: '',
+        cardType: '',
+        quota: null,
+        issuerId: '',
+      },
+      phone: {
+        iso: '',
+        number: '',
+      },
+      discountBank: null,
+      planInfo: {
+        plan: {
+          createdAt: '2022-01-14 10:30:27',
+          currency: 'COP',
+          dateEnd: null,
+          dateStart: null,
+          description: null,
+          frequency: 'ANNUAL',
+          id: '2c9380847e951ba8017e9c03d8fd0199',
+          information: null,
+          metadata: null,
+          name: 'Plan Anual',
+          organizerId: 909453,
+          price: 10000,
+          status: 1,
+          type: 'basic',
+          updatedAt: null,
+          visanetProductId: ""
+        },
+        addressId: '',
+        deliveryType: '',
+        carnetName: 'junior canaless',
+      },
+    };
+  },
+  computed: {
+    documentTypes() {
+      return docTypes.CO
+    },
+    paymentTotal() {
+      let total = this.planInfo.plan.price || 0
+      if (this.discountBank) {
+        total -= this.discountBank
+      }
+      return total.toFixed(2)
+    },
+    currency() {
+      return {
+        iso: 'COP',
+        symbol: '$',
+      }
+    },
+  },
+  methods: {
+    setError(msg) {
+      this.error = msg
+      setTimeout(() => {
+        this.error = ''
+      }, 9000)
+    },
+    submit() {
+      console.log(mercadoPagoKeyCo)
+      Mercadopago.setPublishableKey(mercadoPagoKeyCo)
+      Mercadopago.getIdentificationTypes()
+      this.modalPay = true
+    },
+    submitOk() {
+      this.loading = true
+      const bin = this.card.number.substring(0, 7)
+      Mercadopago.getPaymentMethod({ bin }, this.setPaymentMethodInfo)
+    },
+    setPaymentMethodInfo(status, res) {
+      if (status === 200) {
+        this.paymentMethodId = res[0].id
+        const issuerM = res[0].additional_info_needed.includes('issuer_id')
+        if (issuerM) {
+          Mercadopago.getIssuers(res[0].id, (_, issuers) => {
+            this.cardIssuers = issuers
+          });
+        }
+        const $form = document.querySelector('#pay')
+        setTimeout(() => {
+          Mercadopago.createToken($form, this.sdkResponseHandler)
+        }, 250)
+      } else {
+        this.loading = false
+        // eslint-disable-next-line
+        console.log(`Payment method info error: ${response}`)
+      }
+    },
+    sdkResponseHandler(status, res) {
+      if (status !== 200 && status !== 201) {
+        this.loading = false
+        this.setError('Verifica que los datos sean correctos.')
+      } else {
+        this.paymentMethodToken = res.id
+        setTimeout(() => {
+          this.payProccess()
+        }, 250)
+      }
+    },
+    async payProccess() {
+      this.loading = true
+      try {
+        const body = {
+          country: 'CO', // this.country,
+          preapproval_plan_id: this.planInfo.plan.id,
+          card_token_id: this.paymentMethodToken,
+          payer_email: 'test_user_63507395@testuser.com' // userAuth.email,
+        }
+        const url = '/payment/recurrent/mercadopago/subscription/create'
+        const res = await axios.post(apiCheckout + url, body)
+        console.log('hola')
+        console.log(res)
+      } catch (err) {
+        this.loading = false
+        this.toastError('Error, inténtalo en un momento')
+      }
+    }
+  },
+};
+</script>
