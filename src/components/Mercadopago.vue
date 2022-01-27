@@ -66,8 +66,11 @@ import axios from 'axios'
 import CardMethod from './CardMethod.vue'
 import FormPayCard from './FormPayCard.vue'
 
-const apiCheckout = process.env.VUE_APP_API_CHECKOUT
-const mercadoPagoKeyCo = process.env.VUE_APP_MERCADOPAGO_KEY_CO
+// const apiCheckout = process.env.VUE_APP_API_CHECKOUT
+// const mercadoPagoKeyCo = process.env.VUE_APP_MERCADOPAGO_KEY_CO
+
+const apiCheckout = 'https://devcheckout.joinnus.com/api/v1'
+const mercadoPagoKeyCo = 'APP_USR-b4296116-d367-4d0f-97fa-8c9260553f8a'
 
 const docTypes = {
   PE: [
