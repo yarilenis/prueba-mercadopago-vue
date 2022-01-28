@@ -179,7 +179,6 @@
     <div class="form-pay__footer">
       <button
         type="submit"
-        :disabled="loading || !validCard"
         class="btn btn-primary btn-lg btn-block"
       >
         <b-spinner v-if="loading" small class="mr-1"></b-spinner>
