@@ -1,5 +1,58 @@
 <template>
   <div>
+    <div>
+      <h4>Configuración</h4>
+      <div class="row">
+        <div class="col-6">
+          <b-input-group  class="mb-4">
+            <b-input-group-text slot="prepend">
+              <i class='fa fa-lock'></i>
+            </b-input-group-text>
+            <input
+              type="text"
+              v-model="mercadoPagoKeyCo"
+              name="cvc"
+              required
+              placeholder="mercadoPagoKeyCo"
+              class="form-control"
+              data-checkout="securityCode"
+            />
+          </b-input-group>
+        </div>
+        <div class="col-6">
+          <b-input-group  class="mb-4">
+            <b-input-group-text slot="prepend">
+              <i class='fa fa-lock'></i>
+            </b-input-group-text>
+            <input
+              type="text"
+              v-model="planInfo.plan.id"
+              name="cvc"
+              required
+              placeholder="ID del plan"
+              class="form-control"
+              data-checkout="securityCode"
+            />
+          </b-input-group>
+        </div>
+        <div class="col-6">
+          <b-input-group  class="mb-4">
+            <b-input-group-text slot="prepend">
+              <i class='fa fa-lock'></i>
+            </b-input-group-text>
+            <input
+              type="text"
+              v-model="payerEmail"
+              name="cvc"
+              required
+              placeholder="payer Email"
+              class="form-control"
+              data-checkout="securityCode"
+            />
+          </b-input-group>
+        </div>
+      </div>
+    </div>
     <CardMethod recomended>
       <span slot="title">
         <b>Paga de forma segura con tarjetas nacionales e internacionales</b>
@@ -70,7 +123,7 @@ import FormPayCard from './FormPayCard.vue'
 // const mercadoPagoKeyCo = process.env.VUE_APP_MERCADOPAGO_KEY_CO
 
 const apiCheckout = 'https://devcheckout.joinnus.com/api/v1'
-const mercadoPagoKeyCo = 'APP_USR-b4296116-d367-4d0f-97fa-8c9260553f8a'
+// const mercadoPagoKeyCo = 'APP_USR-b4296116-d367-4d0f-97fa-8c9260553f8a'
 
 const docTypes = {
   PE: [
@@ -141,7 +194,7 @@ export default {
           dateStart: null,
           description: null,
           frequency: 'ANNUAL',
-          id: '2c9380847e951ba8017e9c03d8fd0199',
+          id: '2c9380847e90980f017e9c4bcf25031a',
           information: null,
           metadata: null,
           name: 'Plan Anual',
@@ -156,6 +209,8 @@ export default {
         deliveryType: '',
         carnetName: 'junior canaless',
       },
+      mercadoPagoKeyCo: 'APP_USR-b4296116-d367-4d0f-97fa-8c9260553f8a',
+      payerEmail: 'test_user_63507395@testuser.com',
     };
   },
   computed: {
@@ -184,12 +239,16 @@ export default {
       }, 9000)
     },
     submit() {
-      console.log(mercadoPagoKeyCo)
-      Mercadopago.setPublishableKey(mercadoPagoKeyCo)
+      console.log("mercadoPagoKeyCo", this.mercadoPagoKeyCo)
+      Mercadopago.setPublishableKey(this.mercadoPagoKeyCo)
       Mercadopago.getIdentificationTypes()
       this.modalPay = true
     },
     submitOk() {
+      console.log('CARD values', this.card);
+      console.log('CONF mercadoPagoKeyCo', this.mercadoPagoKeyCo);
+      console.log('CONF payerEmail', this.payerEmail);
+      console.log('CONF plan', this.planInfo.plan.id);
       this.loading = true
       const bin = this.card.number.substring(0, 7)
       Mercadopago.getPaymentMethod({ bin }, this.setPaymentMethodInfo)
@@ -230,12 +289,11 @@ export default {
         const body = {
           country: 'CO', // this.country,
           preapproval_plan_id: this.planInfo.plan.id,
-          card_token_id: this.paymentMethodToken,
-          payer_email: 'test_user_63507395@testuser.com' // userAuth.email,
+          card_token_id: this.payerEmail,
+          payer_email: this.payerEmail // userAuth.email,
         }
         const url = '/payment/recurrent/mercadopago/subscription/create'
         const res = await axios.post(apiCheckout + url, body)
-        console.log('hola')
         console.log(res)
       } catch (err) {
         this.loading = false
