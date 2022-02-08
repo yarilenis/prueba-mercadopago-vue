@@ -1,9 +1,12 @@
 <template>
   <div>
+    <div>paymentMethodToken {{ paymentMethodToken }} </div>
+    <div>resSdk {{ resSdk }} </div>
     <div>
       <h4>Configuración</h4>
       <div class="row">
         <div class="col-6">
+          <p> mercadoPagoKeyCo </p>
           <b-input-group  class="mb-4">
             <b-input-group-text slot="prepend">
               <i class='fa fa-lock'></i>
@@ -20,6 +23,7 @@
           </b-input-group>
         </div>
         <div class="col-6">
+          <p> ID del plan </p>
           <b-input-group  class="mb-4">
             <b-input-group-text slot="prepend">
               <i class='fa fa-lock'></i>
@@ -36,6 +40,7 @@
           </b-input-group>
         </div>
         <div class="col-6">
+          <p> payer Email </p>
           <b-input-group  class="mb-4">
             <b-input-group-text slot="prepend">
               <i class='fa fa-lock'></i>
@@ -46,6 +51,23 @@
               name="cvc"
               required
               placeholder="payer Email"
+              class="form-control"
+              data-checkout="securityCode"
+            />
+          </b-input-group>
+        </div>
+        <div class="col-6">
+          <p> Collector Token </p>
+          <b-input-group  class="mb-4">
+            <b-input-group-text slot="prepend">
+              <i class='fa fa-lock'></i>
+            </b-input-group-text>
+            <input
+              type="text"
+              v-model="collectorToken"
+              name="cvc"
+              required
+              placeholder="Collector Token"
               class="form-control"
               data-checkout="securityCode"
             />
@@ -168,6 +190,7 @@ export default {
       error: '',
       paymentMethodId: '',
       paymentMethodToken: '',
+      resSdk: {},
       cardIssuers: [],
       card: {
         number: '',
@@ -188,13 +211,13 @@ export default {
       discountBank: null,
       planInfo: {
         plan: {
+          id: '2c9380847e90980f017e9c4bcf25031a',
           createdAt: '2022-01-14 10:30:27',
           currency: 'COP',
           dateEnd: null,
           dateStart: null,
           description: null,
           frequency: 'ANNUAL',
-          id: '2c9380847e90980f017e9c4bcf25031a',
           information: null,
           metadata: null,
           name: 'Plan Anual',
@@ -211,6 +234,7 @@ export default {
       },
       mercadoPagoKeyCo: 'APP_USR-b4296116-d367-4d0f-97fa-8c9260553f8a',
       payerEmail: 'test_user_63507395@testuser.com',
+      collectorToken: 'APP_USR-466114512001040-012716-5be1eb8463b48d2e887b485eb88a7d2f-1064103377',
     };
   },
   computed: {
@@ -277,8 +301,10 @@ export default {
         this.loading = false
         this.setError('Verifica que los datos sean correctos.')
       } else {
+        console.log('sdkResponseHandler res', res)
         this.paymentMethodToken = res.id
         setTimeout(() => {
+          console.log('sdkResponseHandler res', res)
           this.payProccess()
         }, 250)
       }
@@ -289,9 +315,11 @@ export default {
         const body = {
           country: 'CO', // this.country,
           preapproval_plan_id: this.planInfo.plan.id,
-          card_token_id: this.payerEmail,
-          payer_email: this.payerEmail // userAuth.email,
+          card_token_id: this.paymentMethodToken,
+          payer_email: this.payerEmail, // userAuth.email,
+          collector_token: this.collectorToken,
         }
+        console.log('payProccess body',body)
         const url = '/payment/recurrent/mercadopago/subscription/create'
         const res = await axios.post(apiCheckout + url, body)
         console.log(res)
